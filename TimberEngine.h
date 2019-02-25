@@ -80,14 +80,14 @@ private:
 	static SoundBuffer chopBuffer, deathBuffer, ootBuffer;
 
 private:
-	static void load_objects();
+	static void load_stationary_objects();
 	static void load_sounds();
 	static void load_texts();
 	static void load_time_bar();
 	static void position_message_text();
 	static void set_branch_sides(int seed);
 	static void update_branch_positions();
-	static void create_view();
+	static void create_main_view();
 	static void prepare_sounds(const char *path, SoundBuffer &soundBuffer, Sound &sound);
 	static void draw_texts();
 	static void draw_clouds();
@@ -100,6 +100,12 @@ private:
 	static void update_texts();
 	static void initialize_objects();
 	static void load_object(const char* path, int posX, int posY, Sprite &objSprite);
+	static void draw_objects();
+	static void handle_dead_player(bool &acceptInput);
+	static void handle_out_of_time();
+	static void handle_chopping(bool &acceptInput, const Side from);
+	static void handle_game_start(bool &acceptInput);
+
 public:
 	static void play();
 };

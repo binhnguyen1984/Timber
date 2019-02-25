@@ -25,29 +25,33 @@ void TimberEngine::prepare_sounds(const char *path, SoundBuffer &soundBuffer, So
 
 void TimberEngine::initialize_objects()
 {
-	/* reset branch positions */
-	for (int i = 0; i < NUM_BRANCHES; i++)
-		branches[i].set_position(-2000,-2000);
+	/* create branches */
+	for (int i = 0; i < NUM_BRANCHES; i++) {
+		// Set the sprite's origin to dead center
+		branches[i].setPosition(-2000, -2000);
+		// We can then spin it round without changing its position
+		branches[i].setOrigin(220, 20);
+	}
 
 	/* reset player's position */
-	player.set_position(PLAYER_X, PLAYER_Y);
+	player.setPosition(PLAYER_X, PLAYER_Y);
 	player.set_side(Side::LEFT);
 
-	/* reset clouds */
+	/* create clouds */
 	for(int i = 0; i< NUM_CLOUDS; i++)
 	{
-		clouds[i].set_position(-300, i * 150);
+		clouds[i].setPosition(-300, i * 150);
 		clouds[i].set_active_state(false);
 		clouds[i].set_speed_X(0);
 	}
 
 	/* reset bees */
-	bee.set_position(0, 800);
+	bee.setPosition(0, 800);
 	bee.set_active_state(false);
 	bee.set_speed_X(0.0f);
 
 	// Make sure the gravestone is hidden
-	rip.set_position(675, 2000);
+	rip.setPosition(675, 2000);
 
 	/* reset the clock */
 	timeRemaining = MAX_TIME;
@@ -62,7 +66,7 @@ void TimberEngine::initialize_objects()
 	score = 0;
 }
 
-void TimberEngine::load_objects()
+void TimberEngine::load_stationary_objects()
 {
 	/* create background sprite */
 	load_object("Data/graphics/background.png", 0,0, backgroundSprite);
@@ -74,18 +78,6 @@ void TimberEngine::load_objects()
 	load_object("Data/graphics/tree2.png", 1300,-400, spriteTree2[2]);
 	load_object("Data/graphics/tree2.png", 1500,-500, spriteTree2[3]);
 	load_object("Data/graphics/tree2.png", 1900, 0, spriteTree2[4]);
-
-	/* create branches */
-	for (int i = 0; i < NUM_BRANCHES; i++) {
-		// Set the sprite's origin to dead center
-		branches[i].set_position(-2000, -2000);
-		// We can then spin it round without changing its position
-		branches[i].set_origin(220, 20);
-	}
-
-	/* create clouds */
-	for(int i = 0; i< NUM_CLOUDS; i++)
-		clouds[i].set_position(-300, i * 150);
 }
 
 void TimberEngine::load_sounds()
@@ -156,12 +148,12 @@ void TimberEngine::load_time_bar()
 	timeBarWidthPerSecond = timeBarStartWidth / timeRemaining;
 }
 
-void TimberEngine::create_view()
+void TimberEngine::create_main_view()
 {
 	/* create the main window */
 	mainView.create(VideoMode(1920, 1080),"Timber", Style::Fullscreen);
 
-	load_objects();
+	load_stationary_objects();
 	load_sounds();
 	load_texts();
 	load_time_bar();
@@ -188,7 +180,7 @@ void TimberEngine::draw_texts()
 void TimberEngine::draw_clouds()
 {
 	for (int i = 0; i < NUM_CLOUDS; i++)
-		mainView.draw(clouds[i].get_sprite());
+		mainView.draw(clouds[i]);
 }
 
 void TimberEngine::draw_trees_and_branches()
@@ -199,7 +191,7 @@ void TimberEngine::draw_trees_and_branches()
 
 	// Draw the branches
 	for (int i = 0; i < NUM_BRANCHES; i++)
-		mainView.draw(branches[i].get_sprite());
+		mainView.draw(branches[i]);
 
 	// Draw the tree
 	mainView.draw(treeSprite);
@@ -252,23 +244,23 @@ void TimberEngine::update_branch_positions()
 		if (s == Side::LEFT)
 		{
 			// Move the sprite to the left side
-			branches[i].set_position(610, height);
+			branches[i].setPosition(610, height);
 			// Flip the sprite round the other way
-			branches[i].set_origin(220, 40);
-			branches[i].set_rotation(180);
+			branches[i].setOrigin(220, 40);
+			branches[i].setRotation(180);
 		}
 		else if (s == Side::RIGHT)
 		{
 			// Move the sprite to the right side
-			branches[i].set_position(1330, height);
+			branches[i].setPosition(1330, height);
 			// Set the sprite rotation to normal
-			branches[i].set_origin(220, 40);
-			branches[i].set_rotation(0);
+			branches[i].setOrigin(220, 40);
+			branches[i].setRotation(0);
 		}
 		else
 		{
 			// Hide the branch
-			branches[i].set_position(3000, height);
+			branches[i].setPosition(3000, height);
 		}
 	}
 }
@@ -285,7 +277,7 @@ void TimberEngine::update_bee()
 		// How high is the bee
 		srand((int)time(0) * 10);
 		float height = (rand() % 500) + 500;
-		bee.set_position(2000, height);
+		bee.setPosition(2000, height);
 		bee.set_active_state(true);
 
 	}
@@ -293,7 +285,7 @@ void TimberEngine::update_bee()
 		// Move the bee
 	{
 
-		bee.set_position(bee.getX() -(bee.get_speed_X() * dt.asSeconds()),
+		bee.setPosition(bee.getX() -(bee.get_speed_X() * dt.asSeconds()),
 			bee.getY());
 
 		// Has the bee reached the right hand edge of the screen?
@@ -303,29 +295,31 @@ void TimberEngine::update_bee()
 
 void TimberEngine::update_clouds()
 {
-	Time dt = clock.restart();
+	//Time dt = clock.restart();
 	for (int i = 0; i < NUM_CLOUDS; i++)
 	{
 		if (!clouds[i].get_state())
 		{
 			// How fast is the cloud
 			srand((int)time(0) * i);
-			clouds[i].set_speed_X((rand() % 200));
+			clouds[i].set_speed_X((rand() % 3));
 
 			// How high is the cloud
 			srand((int)time(0) * i);
 			float height = (rand() % 150);
-			clouds[i].set_position(-200, height);
+			clouds[i].setPosition(-200, height);
 			clouds[i].set_active_state(true);
 		}
 		else
 		{
 			// Set the new position
-			clouds[i].set_position(
+			/*
+			clouds[i].setPosition(
 				clouds[i].getX() +
 				(clouds[i].get_speed_X() * dt.asSeconds()),
 				clouds[i].getY());
-
+			*/
+			clouds[i].move(clouds[i].get_speed_X(), 0);
 			// Has the cloud reached the right hand edge of the screen?
 			if (clouds[i].getX() > 1920)
 				// Set it up ready to be a whole new cloud next frame
@@ -351,27 +345,135 @@ void TimberEngine::update_texts()
 
 void TimberEngine::update_log()
 {
-	Time dt = clock.restart();
+	//Time dt = clock.restart();
 	if (log.get_state())
 	{
-
-		log.set_position(
+		log.move(log.get_speed_X(), log.get_speed_Y());
+		/*
+		log.setPosition(
 				log.getX() + (log.get_speed_X() * dt.asSeconds()),
 				log.getY() + (log.get_speed_Y() * dt.asSeconds()));
-
+		*/
 		// Has the insect reached the right hand edge of the screen?
 		if (log.getX() < -100 || log.getX() > 2000)
 		{
 			// Set it up ready to be a whole new cloud next frame
 			log.set_active_state(false);
-			log.set_position(810, 720);
+			log.setPosition(810, 720);
 		}
 	}
+}
+
+void TimberEngine::draw_objects() {
+	// Draw our game scene here
+	mainView.draw(backgroundSprite);
+	// Draw the clouds
+	draw_clouds();
+	// draw trees and branches
+	draw_trees_and_branches();
+	// Draw the player
+	mainView.draw(player);
+	// Draw the axe
+	mainView.draw(axe);
+	// Draraw the flying log
+	mainView.draw(log);
+	// Draw the gravestone
+	mainView.draw(rip);
+	// Draw texts
+	draw_texts();
+	// Drawraw the bee
+	mainView.draw(bee);
+	// Draw the timebar
+	mainView.draw(timeBar);
+	if (paused) {
+		// Draw our message
+		mainView.draw(messageText);
+	}
+}
+
+void TimberEngine::handle_dead_player(bool &acceptInput) {
+	// has the player been squished by a branch?
+	if (branches[NUM_BRANCHES - 1].get_side() == player.get_side()) {
+		// death
+		paused = true;
+		acceptInput = false;
+		// Draw the gravestone
+		rip.setPosition(525, 760);
+		// hide the player
+		player.setPosition(2000, 660);
+		// Change the text of the message
+		messageText.setString("SQUISHED!!");
+		// Center it on the screen
+		position_message_text();
+		// Play the death sound
+		death.play();
+	}
+}
+
+void TimberEngine::handle_out_of_time() {
+	// handle out of time
+	if (timeRemaining <= 0.0f) {
+		// Pause the game
+		paused = true;
+		// Change the message shown to the player
+		messageText.setString("Out of time!!");
+		//Reposition the text based on its new size
+		position_message_text();
+		// Play the out of time sound
+		outOfTime.play();
+	}
+}
+
+void TimberEngine::handle_chopping(bool &acceptInput, const Side from) {
+	// Make sure the player is on the right
+	player.set_side(from);
+	score++;
+	// Add to the amount of time remaining
+	timeRemaining += (2 / score) + .15;
+	if(from==Side::RIGHT)
+	{
+		axe.setPosition(AXE_POSITION_RIGHT, axe.getY());
+		player.setPosition(1200, 720);
+		log.set_speed_X(-100);
+	}
+	else
+	{
+		axe.setPosition(AXE_POSITION_LEFT,	axe.getY());
+		player.setPosition(580, 720);
+		log.set_speed_X(100);
+	}
+	// update the branches
+	set_branch_sides(score);
+	// set the log flying to the left
+	log.setPosition(810, 720);
+	log.set_speed_Y(-50);
+	log.set_active_state(true);
+	acceptInput = false;
+	// Play a chop sound
+	chop.play();
+}
+
+void TimberEngine::handle_game_start(bool &acceptInput)
+{
+	// Reset the time and the score
+	score = 0;
+	timeRemaining = 6;
+
+	// Make all the branches disappear
+	for (int i = 1; i < NUM_BRANCHES; i++)
+		branches[i].set_side(Side::NONE);
+
+	// Make sure the gravestone is hidden
+	rip.setPosition(675, 2000);
+
+	// Move the player into position
+	player.setPosition(580, 720);
+	acceptInput = true;
 }
 void TimberEngine::play()
 {
 	// create the main view
-	TimberEngine::create_view();
+	TimberEngine::create_main_view();
 
 	//play the game
 	int lastDrawn = 0;
@@ -388,7 +490,7 @@ void TimberEngine::play()
 				// Listen for key presses again
 				acceptInput = true;
 				// hide the axe
-				axe.set_position(2000,	axe.getY());
+				axe.setPosition(2000,axe.getY());
 				//hide the message
 				messageText.setString("");
 			}
@@ -407,78 +509,25 @@ void TimberEngine::play()
 		if (Keyboard::isKeyPressed(Keyboard::Return))
 		{
 			paused = false;
-
-			// Reset the time and the score
-			score = 0;
-			timeRemaining = 6;
-
-			// Make all the branches disappear
-			for (int i = 1; i < NUM_BRANCHES; i++)
-				branches[i].set_side(Side::NONE);
-
-			// Make sure the gravestone is hidden
-			rip.set_position(675, 2000);
-
-			// Move the player into position
-			player.set_position(580, 720);
-			acceptInput = true;
+			handle_game_start(acceptInput);
 		}
 
 		// Wrap the player controls to
 		// Make sure we are accepting input
 		if (acceptInput)
 		{
-			// More code here next...
 			// First handle pressing the right cursor key
 			if (Keyboard::isKeyPressed(Keyboard::Right))
 			{
 				// Make sure the player is on the right
-				player.set_side(Side::RIGHT);
-
-				score++;
-
-				// Add to the amount of time remaining
-				timeRemaining += (2 / score) + .15;
-
-				axe.set_position(AXE_POSITION_RIGHT,axe.getY());
-				player.set_position(1200, 720);
-
-				// update the branches
-				set_branch_sides(score);
-
-				// set the log flying to the left
-				log.set_position(810, 720);
-				log.set_speed_X(-5000);
-				log.set_active_state(true);
-				acceptInput = false;
-				// Play a chop sound
-				chop.play();
+				handle_chopping(acceptInput, Side::RIGHT);
 			}
 
 			// Handle the left cursor key
 			if (Keyboard::isKeyPressed(Keyboard::Left))
 			{
 				// Make sure the player is on the left
-				player.set_side(Side::LEFT);
-				score++;
-
-				// Add to the amount of time remaining
-				timeRemaining += (2 / score) + .15;
-
-				axe.set_position(AXE_POSITION_LEFT,	axe.getY());
-
-				player.set_position(580, 720);
-
-				// update the branches
-				set_branch_sides(score);
-
-				// set the log flying
-				log.set_position(810, 720);
-				log.set_speed_X(5000);
-				log.set_active_state(true);
-				acceptInput = false;
-				// Play a chop sound
-				chop.play();
+				handle_chopping(acceptInput, Side::LEFT);
 			}
 		}
 
@@ -490,24 +539,10 @@ void TimberEngine::play()
 		*/
 		if (!paused)
 		{
-
 			// update time
 			update_time();
 			// handle out of time
-			if (timeRemaining <= 0.0f) {
-
-				// Pause the game
-				paused = true;
-
-				// Change the message shown to the player
-				messageText.setString("Out of time!!");
-
-				//Reposition the text based on its new size
-				position_message_text();
-
-				// Play the out of time sound
-				outOfTime.play();
-			}
+			handle_out_of_time();
 			// update the bee
 			update_bee();
 			// update clouds
@@ -524,26 +559,7 @@ void TimberEngine::play()
 			// Handle a flying log
 			update_log();
 			// has the player been squished by a branch?
-			if (branches[NUM_BRANCHES-1].get_side() == player.get_side())
-			{
-				// death
-				paused = true;
-				acceptInput = false;
-
-				// Draw the gravestone
-				rip.set_position(525, 760);
-
-				// hide the player
-				player.set_position(2000, 660);
-
-				// Change the text of the message
-				messageText.setString("SQUISHED!!");
-
-				// Center it on the screen
-				position_message_text();
-				// Play the death sound
-				death.play();
-			}
+			handle_dead_player(acceptInput);
 		}// End if(!paused)
 
 		 /*
@@ -551,42 +567,10 @@ void TimberEngine::play()
 		 Draw the scene
 		 ****************************************
 		 */
-
 		 // Clear everything from the last frame
 		mainView.clear();
-
 		// Draw our game scene here
-		mainView.draw(backgroundSprite);
-
-		// Draw the clouds
-		draw_clouds();
-
-		// draw trees and branches
-		draw_trees_and_branches();
-		// Draw the player
-		mainView.draw(player.get_sprite());
-
-		// Draw the axe
-		mainView.draw(axe.get_sprite());
-
-		// Draraw the flying log
-		mainView.draw(log.get_sprite());
-
-		// Draw the gravestone
-		mainView.draw(rip.get_sprite());
-
-		// Draw texts
-		draw_texts();
-		// Drawraw the bee
-		mainView.draw(bee.get_sprite());
-		// Draw the timebar
-		mainView.draw(timeBar);
-		if (paused)
-		{
-			// Draw our message
-			mainView.draw(messageText);
-		}
-
+		draw_objects();
 		// Show everything we just drew
 		mainView.display();
 	}
